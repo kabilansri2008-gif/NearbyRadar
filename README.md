@@ -1,355 +1,168 @@
 # 📡 R.A.D.A.R. — Real-Time Device Activity Radar
 
-**R.A.D.A.R. (Real-Time Device Activity Radar)** is a desktop application that visualizes nearby Bluetooth and Wi-Fi activity through an interactive radar interface.
+A desktop app that turns nearby Bluetooth Low Energy (BLE) and Wi-Fi activity into an interactive, animated radar. It reads only what devices and access points **publicly broadcast**, estimates relative proximity from signal strength (RSSI), and keeps a local history so you can see what's new and what's changed.
 
-It detects publicly broadcast device information, estimates proximity using signal strength, identifies manufacturers where possible, and provides visualization and local-history features for monitoring device activity.
-
----
-
-## 🔍 Overview
-
-R.A.D.A.R. combines **Bluetooth Low Energy (BLE)** and **Wi-Fi scanning** with a graphical radar interface.
-
-The application can:
-
-* 🔵 Discover nearby Bluetooth Low Energy devices
-* 📶 Detect available Wi-Fi networks
-* 📛 Display broadcast device names when available
-* 🏭 Identify manufacturers using offline MAC-prefix information
-* 📏 Estimate approximate proximity using RSSI signal strength
-* 🗃️ Maintain a local history of previously detected devices
-* 🛰️ Visualize detected devices as animated radar points
-
-### 🚫 What R.A.D.A.R. Cannot Do
-
-R.A.D.A.R. works only with information that devices publicly broadcast.
-
-It **cannot**:
-
-* ❌ Identify the real person who owns a device
-* ❌ Obtain phone numbers or private contact information
-* ❌ Extract private information from nearby devices
-* ❌ Bypass operating-system privacy protections
-* ❌ Determine a person's identity from a device name
-
-🔐 Some modern devices also use randomized Bluetooth addresses, so manufacturer information may not always be available.
+> **Responsible use:** R.A.D.A.R. is for understanding your own radio environment (home, lab, office, learning). Do not use it to monitor or track people without their knowledge and consent.
 
 ---
 
-## ✨ Key Features
+## Contents
 
-| Feature                      | Description                                                                |
-| ---------------------------- | -------------------------------------------------------------------------- |
-| 🛰️ **Live Radar**           | Displays detected devices as moving radar points                           |
-| 🔄 **Instant Rescan**        | Starts a new scan immediately                                              |
-| 🌀 **Motion Trails**         | Shows recent movement of radar points                                      |
-| 💡 **Signal Pulse**          | Changes animation according to signal strength                             |
-| 📱 **Device Classification** | Attempts to classify phones, laptops, watches, speakers, and other devices |
-| 🗺️ **Activity Heatmap**     | Visualizes areas where device activity has accumulated                     |
-| 🔊 **Sonar Mode**            | Provides audible proximity feedback based on signal strength               |
-| 🆕 **Device History**        | Records previously detected devices locally                                |
-| 📊 **Device Details**        | Displays vendor, RSSI, and signal history                                  |
-| 🔔 **Watch Mode**            | Generates desktop notifications for selected devices                       |
-| 📤 **Data Export**           | Saves scan results as CSV or JSON                                          |
+- [Features](#features)
+- [What it can and cannot do](#what-it-can-and-cannot-do)
+- [Quick start](#quick-start)
+- [Using the app](#using-the-app)
+- [Platform notes](#platform-notes)
+- [Data and privacy](#data-and-privacy)
+- [Accuracy](#accuracy)
+- [Troubleshooting](#troubleshooting)
+- [Project structure](#project-structure)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
-## 📁 Project Structure
+## Features
 
-```text
-NearbyRadar/
-│
-├── main.py              # 🚀 Application entry point
-├── radar_ui.py          # 🖥️ Radar interface and visualization
-├── ble_scanner.py       # 🔵 Bluetooth Low Energy scanner
-├── wifi_scanner.py      # 📶 Wi-Fi discovery
-├── oui_lookup.py        # 🏭 Offline manufacturer lookup
-├── device_type.py       # 📱 Device-type classification
-├── device_db.py         # 🗃️ Local SQLite device history
-├── notifier.py          # 🔔 Desktop notification system
-├── exporter.py          # 📤 CSV and JSON export
-├── sonar.py             # 🔊 Audio proximity system
-└── requirements.txt     # 📦 Python dependencies
-```
+| Feature | Description |
+| --- | --- |
+| 🛰️ Live radar | Detected devices appear as moving points; distance from center reflects signal strength |
+| 🔵 BLE + 📶 Wi-Fi scanning | Discovers nearby BLE devices and Wi-Fi networks |
+| 🏭 Vendor lookup | Offline MAC-prefix (OUI) database, no internet needed |
+| 📱 Device classification | Best-effort labels: phone, laptop, watch, speaker, other |
+| 🌀 Motion trails & 💡 signal pulse | Recent movement and animation tied to signal strength |
+| 🗺️ Activity heatmap | Shows where activity has accumulated over time |
+| 🔊 Sonar mode | Audio feedback that rises with signal strength |
+| 🆕 Local history | SQLite log of past sightings: NEW badges, seen-count, RSSI graphs |
+| 🔔 Watch mode | Desktop notification when a selected device enters or leaves range |
+| 📤 Export | Save scan results as CSV or JSON |
+
+## What it can and cannot do
+
+R.A.D.A.R. works only with broadcast data. It **cannot**:
+
+- identify the person who owns a device, or infer identity from a device name
+- obtain phone numbers or any private or contact information
+- read data from other devices or bypass OS privacy protections
+
+Many modern devices use **randomized Bluetooth addresses**, so vendor and history matching may be incomplete or inconsistent.
 
 ---
 
-## 🚀 Getting Started
+## Quick start
 
-### 📋 Requirements
-
-Before starting, make sure you have:
-
-* 🐍 Python **3.9 or newer**
-* 🔵 Bluetooth support
-* 📶 Wi-Fi support
-* 💻 VS Code or another Python-compatible editor
-
-### 1️⃣ Clone or Open the Project
-
-Open the project directory in VS Code.
+**Requirements:** Python 3.9+, a Bluetooth adapter, a Wi-Fi adapter.
 
 ```bash
 cd NearbyRadar
-```
 
-### 2️⃣ Create a Virtual Environment
-
-Creating a virtual environment keeps the project's dependencies isolated.
-
-```bash
+# 1. Create and activate a virtual environment
 python -m venv venv
-```
+venv\Scripts\activate          # Windows
+source venv/bin/activate       # macOS / Linux
 
-Activate it on **Windows**:
-
-```bash
-venv\Scripts\activate
-```
-
-On **macOS/Linux**:
-
-```bash
-source venv/bin/activate
-```
-
-### 3️⃣ 📦 Install Dependencies
-
-```bash
+# 2. Install dependencies
 pip install -r requirements.txt
-```
 
-### 4️⃣ ▶️ Start R.A.D.A.R.
-
-```bash
+# 3. Run
 python main.py
 ```
 
 ---
 
-## 🖥️ Using the Application
+## Using the app
 
-Once the radar window opens, you can interact with the available controls.
+| Control | What it does |
+| --- | --- |
+| **Rescan Now** | Starts a new scan immediately |
+| **Heatmap** | Toggles accumulated-activity overlay |
+| **Sonar** | Audio proximity feedback. Follows the selected device, otherwise the strongest signal |
+| **Click a point** | Opens the details panel: name, vendor, RSSI, signal history |
+| **Watch** | Notifies you when the selected device enters or leaves range |
+| **Export** | Saves current results as `CSV` or `JSON` |
+| **ESC** | Exit |
 
-### 🔄 Rescan
+---
 
-Use **Rescan Now** to immediately search for nearby devices.
+## Platform notes
 
-### 🗺️ Heatmap
+| OS | Wi-Fi scanning | Bluetooth | Notes |
+| --- | --- | --- | --- |
+| 🪟 Windows | `netsh wlan show networks` | `bleak` | Wi-Fi and Bluetooth must be on |
+| 🐧 Linux | `nmcli` (`sudo apt install network-manager` if missing) | `bleak` + BlueZ | May need your user in the `bluetooth` group or elevated permissions |
+| 🍎 macOS | System networking tools | `bleak` | Grant Bluetooth (and, if prompted, Location) permission to your terminal or editor |
 
-Switch the **Heatmap** option on or off to display accumulated device activity.
+If a scanner is unavailable, the app can fall back to **demonstration data**. Demo data is simulated and does not represent real nearby devices.
 
-### 🔊 Sonar
+**Notifications** use `plyer`. If your OS blocks them, alerts are printed to the terminal instead.
 
-Enable **Sonar** to hear proximity-based audio feedback.
+---
 
-If a device is selected, the sonar follows that device. Otherwise, it uses the device with the strongest detected signal.
+## Data and privacy
 
-### 📍 Device Information
+- All history is stored **locally** in `radar_history.db` (SQLite). Nothing is uploaded.
+- Stored: device identifier as broadcast, broadcast name, vendor, RSSI samples, first/last seen times.
+- To reset history, close the app and delete `radar_history.db`.
+- Exports (CSV/JSON) contain the same scan data. Treat them as sensitive if they include devices that aren't yours.
 
-Select a radar point to open its information panel.
+---
 
-Depending on the available broadcast information, the panel can show:
+## Accuracy
 
-* 📛 Device name
-* 🏭 Manufacturer
-* 📶 RSSI
-* 📈 Signal history
+Distance is an **estimate**, not a measurement. RSSI is affected by:
 
-### 🔔 Watch Mode
+- 🧱 walls and obstacles
+- 📡 interference from other radios
+- 📱 device orientation and body position
+- 📶 antenna and chipset differences
 
-Select a device and enable **Watch** to receive a desktop notification when the device enters or leaves the detected range.
+Use position on the radar as "closer / farther", not as meters.
 
-### 📤 Export
+---
 
-Use the export controls to save the current scan results as:
+## Troubleshooting
+
+**No Bluetooth devices appear**
+1. Confirm Bluetooth is on.
+2. Confirm your OS has granted Bluetooth permission to your terminal / Python.
+3. Reinstall dependencies: `pip install -r requirements.txt`, then restart `python main.py`.
+
+**Wi-Fi scan doesn't work**
+Confirm `netsh` (Windows) or `nmcli` (Linux) is available and Wi-Fi is enabled. Otherwise the app falls back to demo data.
+
+**No notifications**
+Enable desktop notifications for your Python environment. Otherwise alerts appear in the terminal.
+
+---
+
+## Project structure
 
 ```text
-📄 CSV
-📋 JSON
-```
-
-### 🚪 Exit
-
-Press **ESC** or close the application window to exit.
-
----
-
-## 🌐 Platform Support
-
-### 🪟 Windows
-
-Wi-Fi discovery uses:
-
-```text
-netsh wlan show networks
-```
-
-Bluetooth scanning is handled through `bleak`.
-
-### 🐧 Linux
-
-Wi-Fi discovery uses:
-
-```text
-nmcli
-```
-
-If NetworkManager is not installed:
-
-```bash
-sudo apt install network-manager
-```
-
-Bluetooth scanning requires **BlueZ**.
-
-### 🍎 macOS
-
-Wi-Fi discovery uses the available system networking tools, while Bluetooth scanning is handled through `bleak`.
-
-If the required scanning command is unavailable, the application can fall back to demonstration data.
-
----
-
-## 🔔 Notifications
-
-R.A.D.A.R. uses **`plyer`** for desktop notifications.
-
-If the operating system does not allow `plyer` to display a notification, the alert information is printed in the terminal instead.
-
----
-
-## 🗃️ Local Device History
-
-The application stores scan history using **SQLite**.
-
-The database file is:
-
-```text
-radar_history.db
-```
-
-It is used for features such as:
-
-* 🆕 NEW device indicators
-* 🔢 Previously seen device counts
-* 📶 RSSI history
-* 📈 Signal graphs
-
-The history is stored locally by the application.
-
-To reset the local history, remove:
-
-```text
-radar_history.db
+NearbyRadar/
+├── main.py            # Entry point
+├── radar_ui.py        # Radar interface and visualization
+├── ble_scanner.py     # BLE scanning
+├── wifi_scanner.py    # Wi-Fi discovery
+├── oui_lookup.py      # Offline manufacturer lookup
+├── device_type.py     # Device-type classification
+├── device_db.py       # SQLite device history
+├── notifier.py        # Desktop notifications
+├── exporter.py        # CSV / JSON export
+├── sonar.py           # Audio proximity feedback
+└── requirements.txt   # Python dependencies
 ```
 
 ---
 
-## 🔐 Privacy
+## Contributing
 
-R.A.D.A.R. is designed around publicly available broadcast information.
+Improvements to docs, usability, reliability, platform compatibility, and visualization are welcome.
 
-The application does **not** attempt to identify people or access private device information.
+1. Create a branch
+2. Make and test your changes
+3. Commit with a clear message
+4. Open a pull request explaining what changed and why
 
-It uses information such as:
+## License
 
-* 📛 Broadcast device names
-* 📶 Signal strength
-* 🏭 Manufacturer information
-* 📡 Wi-Fi network information
-
-Operating-system permissions and privacy restrictions are respected.
-
-Some platforms may require location services or additional permissions before Bluetooth or Wi-Fi scanning can operate.
-
-> ⚠️ **Please use R.A.D.A.R. responsibly and do not use it to monitor or track people without their knowledge or permission.**
-
----
-
-## 🛠️ Troubleshooting
-
-### 🔵 No Bluetooth Devices Appear
-
-Check that:
-
-1. Bluetooth is enabled.
-2. Python is installed correctly.
-3. Project dependencies are installed.
-4. Your operating system has granted the required permissions.
-
-Try:
-
-```bash
-pip install -r requirements.txt
-```
-
-Then restart:
-
-```bash
-python main.py
-```
-
-### 📶 Wi-Fi Scanning Does Not Work
-
-Check that your operating system supports the required network-scanning command.
-
-* 🪟 Windows → `netsh`
-* 🐧 Linux → `nmcli`
-* 🍎 macOS → system networking tools
-
-If a scanner is unavailable, R.A.D.A.R. may use demonstration data.
-
-### 🔔 Notifications Do Not Appear
-
-Make sure desktop notifications are enabled for your Python/application environment.
-
-If notification delivery is unavailable, R.A.D.A.R. reports the alert through the terminal.
-
----
-
-## 📌 Important Note
-
-📏 Signal-based distance is only an **approximation**.
-
-RSSI can change because of:
-
-* 🧱 Walls and obstacles
-* 📡 Wireless interference
-* 📱 Device orientation
-* 📶 Antenna differences
-* 🌐 Environmental conditions
-
-Therefore, radar position and distance should **not** be treated as exact physical measurements.
-
----
-
-## 🤝 Contributing
-
-Contributions that improve documentation, usability, reliability, compatibility, or visualization are welcome.
-
-Before making a significant change:
-
-1. 🌿 Create a separate branch.
-2. ✏️ Make your changes.
-3. 🧪 Test the application.
-4. 💾 Commit your changes with a clear message.
-5. 🚀 Open a pull request describing what was changed and why.
-
----
-
-## 📄 License
-
-Refer to the repository's **LICENSE** file for the applicable project license and usage terms.
-
----
-
-<div align="center">
-
-### 📡 R.A.D.A.R.
-
-**Visualize nearby device activity through a simple, interactive radar interface.**
-
-🔵 Bluetooth • 📶 Wi-Fi • 📊 Visualization • 🔐 Privacy
-
-</div>
+See the repository's `LICENSE` file.
